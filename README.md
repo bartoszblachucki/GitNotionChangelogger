@@ -1,6 +1,14 @@
 
 # Changelogger for git and notion
 
+> ## 🚧 WIP Notice 🚧
+> Right now the tool may not be usable as-is to everyone because:
+> - Notion database ID is hardcoded in notion.py
+> - it assumes that issue ID is formatted precisely as `ID-{number}`
+> - To customize emojis, titles or commit types, source code has to be edited
+> This however shouldn't stop you from modyfing this tool to suit your needs.
+
+
 A simple tool that takes a list of commit shas with conventional messages, finds optional Issue/Task ids in them, matches them with a Notion database and creates a pretty changelog:
 
 >➕ Added:
