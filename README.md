@@ -5,7 +5,8 @@
 > Right now the tool may not be usable as-is to everyone because:
 > - Notion database ID is hardcoded in notion.py
 > - it assumes that issue ID is formatted precisely as `ID-{number}`
-> - To customize emojis, titles or commit types, source code has to be edited
+> - To customize emojis, titles or commit types, source code has to be modified.
+>
 > This however shouldn't stop you from modyfing this tool to suit your needs.
 
 
