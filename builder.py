@@ -11,12 +11,28 @@ def strip_commit_message(message: str):
     return message.split('\n', 1)[0]
 
 
+def extract_type_from_commit_message(message: str):
+    pattern = r'^\s*([a-zA-Z]+)\s*(\!)?'
+    match = re.match(pattern, message)
+
+    if match:
+        return match.group(1), match.group(2) == '!'
+    else:
+        return None, False
+
+
+def is_breaking_change(commit):
+    _, is_exclamation = extract_type_from_commit_message(commit.message)
+    return is_exclamation
+
+
 def build_change_string(repo: git.Repo, commit: git.Commit, related_issues):
     message = strip_commit_message(commit.message)
     author = commit.author.email
     short_sha = commit.hexsha[:7]
 
-    change_str = f"{message} - {author}\n"
+    raw_change = f"{message} - {author}"
+    pretty_change = f"{message} - {author}"
 
     if repo.remotes:
         remote_url = repo.remotes[0].url
@@ -24,14 +40,22 @@ def build_change_string(repo: git.Repo, commit: git.Commit, related_issues):
             remote_url = remote_url[:-4]
 
         url = f"{remote_url}/commit/{commit.hexsha}"
-        change_str = f"[{build_md_link(short_sha, url)}] {change_str}"
+        md_url = build_md_link(short_sha, url)
+        raw_change = f"[{md_url}] {raw_change}"
+        pretty_change = f"[{md_url}] {pretty_change}"
 
     if related_issues:
         for issue in related_issues:
             _id, url = issue
-            change_str = f"[{build_md_link(_id, url)}] {change_str}"
+            md_issue = build_md_link(_id, url)
+            raw_change = f"{md_issue} {raw_change}"
+            pretty_change = f"{md_issue} {pretty_change}"
 
-    return "- " + change_str
+    if is_breaking_change(commit):
+        raw_change = f"BREAKING CHANGE: {raw_change}"
+        pretty_change = f"⚠️**BREAKING CHANGE:**⚠️ {pretty_change}"
+
+    return "- " + raw_change + "\n", "- " + pretty_change + "\n"
 
 
 def get_issue_ids_from_commit(commit: git.Commit):
@@ -63,9 +87,9 @@ def build_type_changelog(repo, _commits, issues, commit_type):
 
     for commit in _commits:
         related_issues = get_issues_for_commit(issues, commit)
-        change = build_change_string(repo, commit, related_issues)
-        raw_changelog += change
-        pretty_changelog += change
+        raw_change, pretty_change = build_change_string(repo, commit, related_issues)
+        raw_changelog += raw_change
+        pretty_changelog += pretty_change
 
     raw_changelog += "\n"
     pretty_changelog += "\n"
