@@ -1,2 +1,2 @@
 @echo off
-pyinstaller --icon=m1_changelogger.ico --onefile m1_changelogger.py
+pyinstaller --icon=icon.ico --onefile m1_changelogger.py
