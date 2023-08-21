@@ -48,8 +48,8 @@ def build_change_string(repo: git.Repo, commit: git.Commit, related_issues):
         for issue in related_issues:
             _id, url = issue
             md_issue = build_md_link(_id, url)
-            raw_change = f"{md_issue} {raw_change}"
-            pretty_change = f"{md_issue} {pretty_change}"
+            raw_change = f"[{md_issue}] {raw_change}"
+            pretty_change = f"[{md_issue}] {pretty_change}"
 
     if is_breaking_change(commit):
         raw_change = f"BREAKING CHANGE: {raw_change}"
