@@ -25,12 +25,13 @@ def get_pages(token):
     #    json.dump(data, f, ensure_ascii=False, indent=4)
 
     results = data["results"]
-    while data["has_more"] and get_all:
-        payload = {"page_size": page_size, "start_cursor": data["next_cursor"]}
-        url = f"https://api.notion.com/v1/databases/{DATABASE_ID}/query"
-        response = requests.post(url, json=payload, headers=headers)
-        data = response.json()
-        results.extend(data["results"])
+     
+    # while data["has_more"] and get_all:
+    #     payload = {"page_size": page_size, "start_cursor": data["next_cursor"]}
+    #     url = f"https://api.notion.com/v1/databases/{DATABASE_ID}/query"
+    #     response = requests.post(url, json=payload, headers=headers)
+    #     data = response.json()
+    #     results.extend(data["results"])
 
     return results
 
