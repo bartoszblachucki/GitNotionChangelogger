@@ -114,8 +114,9 @@ if __name__ == "__main__":
     pretty_changelog += build_changelog_for_type(commits, issues, "chore", "🧹 Maintained")
     pretty_changelog += build_changelog_for_type(commits, issues, "perf", "🚀 Optimized")
     pretty_changelog += build_changelog_for_type(commits, issues, "refactor", "⚙ Refactored")
+    pretty_changelog += build_changelog_for_type(commits, issues, "style", "🖼 Styled")
+    pretty_changelog += build_changelog_for_type(commits, issues, "docs", "📝 Documented")
     pretty_changelog += build_changelog_for_type(commits, issues, "remove", "❌ Removed")
-    
     others = build_changelog_for_type(commits, issues, None, "🤷‍ Other")
     for line in others.split("\n"):
         if line not in pretty_changelog:
@@ -127,6 +128,8 @@ if __name__ == "__main__":
     raw_changelog += build_changelog_for_type(commits, issues, "chore", "Maintained")
     raw_changelog += build_changelog_for_type(commits, issues, "perf", "Optimized")
     raw_changelog += build_changelog_for_type(commits, issues, "refactor", "Refactored")
+    raw_changelog += build_changelog_for_type(commits, issues, "style", "Styled")
+    raw_changelog += build_changelog_for_type(commits, issues, "docs", "Documented")
     raw_changelog += build_changelog_for_type(commits, issues, "remove", "Removed")
     others = build_changelog_for_type(commits, issues, None, "Other")
     for line in others.split("\n"):
