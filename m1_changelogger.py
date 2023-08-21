@@ -23,17 +23,12 @@ install_dependencies(["requests", "git", "pyperclip"])"""
 
 # builtin
 import sys
-import os
-import re
 
 # pip
-import git
-import requests
 import pyperclip
 
-import builder
 # local
-import notion
+import builder
 
 
 if __name__ == "__main__":
