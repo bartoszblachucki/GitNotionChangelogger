@@ -1,0 +1,127 @@
+import re
+import git
+import notion
+
+
+def build_md_link(text: str, url: str):
+    return f"[{text}]({url})"
+
+
+def strip_commit_message(message: str):
+    return message.split('\n', 1)[0]
+
+
+def build_change_string(repo: git.Repo, commit: git.Commit, related_issues):
+    message = strip_commit_message(commit.message)
+    author = commit.author.email
+    short_sha = commit.hexsha[:7]
+
+    change_str = f"{message} - {author}\n"
+
+    if repo.remotes:
+        remote_url = repo.remotes[0].url
+        if remote_url.endswith(".git"):
+            remote_url = remote_url[:-4]
+
+        url = f"{remote_url}/commit/{commit.hexsha}"
+        change_str = f"[{build_md_link(short_sha, url)}] {change_str}"
+
+    if related_issues:
+        for issue in related_issues:
+            _id, url = issue
+            change_str = f"[{build_md_link(_id, url)}] {change_str}"
+
+    return "- " + change_str
+
+
+def get_issue_ids_from_commit(commit: git.Commit):
+    issue_id_pattern = r'ID-\d+'
+    issue_ids = re.findall(issue_id_pattern, commit.message)
+    return issue_ids
+
+
+def get_issues_for_ids(issues, issue_ids):
+    found = []
+    for _id in issue_ids:
+        for issue in issues:
+            issue_id, issue_url = issue
+            if issue_id == _id:
+                found.append(issue)
+
+    return found
+
+
+def get_issues_for_commit(issues, commit: git.Commit):
+    ids = get_issue_ids_from_commit(commit)
+    if ids:
+        return get_issues_for_ids(issues, ids)
+
+
+def build_type_changelog(repo, _commits, issues, commit_type):
+    raw_changelog = f"{commit_type.changelog_title}:\n"
+    pretty_changelog = f"{commit_type.emoji} {commit_type.changelog_title}:\n"
+
+    for commit in _commits:
+        related_issues = get_issues_for_commit(issues, commit)
+        change = build_change_string(repo, commit, related_issues)
+        raw_changelog += change
+        pretty_changelog += change
+
+    raw_changelog += "\n"
+    pretty_changelog += "\n"
+
+    return raw_changelog, pretty_changelog
+
+
+class CommitType:
+    def __init__(self, prefix, changelog_title, emoji):
+        self.prefix = prefix
+        self.changelog_title = changelog_title
+        self.emoji = emoji
+
+
+commit_types = [
+    CommitType("feat", "Added", "✅"),
+    CommitType("fix", "Fixed", "🛠"),
+    CommitType("deprecate", "Deprecated", "👴"),
+    CommitType("chore", "Maintained", "🧹"),
+    CommitType("refactor", "Refactored", "🔨"),
+    CommitType("style", "Styled", "🎨"),
+    CommitType("test", "Tested", "🧪"),
+    CommitType("perf", "Optimized", "🚀"),
+    CommitType("docs", "Documented", "📝"),
+    CommitType("remove", "Removed", "❌"),
+]
+
+other_commit_type = CommitType(None, "Other", "📦")
+
+
+def build_changelog(notion_token, repo_directory, commit_shas) -> tuple:
+    repo = git.Repo(repo_directory)
+    commits = [repo.commit(x) for x in commit_shas]
+    issues = notion.get_issues(notion_token)
+
+    commits_by_type = {}
+    for commit_type in commit_types:
+        commits_by_type[commit_type] = []
+    commits_by_type[other_commit_type] = []
+
+    for commit in commits:
+        for commit_type in commit_types:
+            if commit.message.startswith(commit_type.prefix):
+                commits_by_type[commit_type].append(commit)
+                break
+        else:
+            commits_by_type[other_commit_type].append(commit)
+
+    raw_changelog = ""
+    pretty_changelog = ""
+
+    for commit_type in commit_types:
+        _commits = commits_by_type[commit_type]
+        if _commits:
+            raw_type_changelog, pretty_type_changelog = build_type_changelog(repo, _commits, issues, commit_type)
+            raw_changelog += raw_type_changelog
+            pretty_changelog += pretty_type_changelog
+
+    return raw_changelog, pretty_changelog

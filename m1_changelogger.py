@@ -31,83 +31,9 @@ import git
 import requests
 import pyperclip
 
+import builder
 # local
 import notion
-
-
-def build_md_link(text: str, url: str):
-    return f"[{text}]({url})"
-
-
-def strip_commit_message(message: str):
-    return message.split('\n', 1)[0]
-
-
-def build_change_string(repo: git.Repo, commit: git.Commit, related_issues):
-    message = strip_commit_message(commit.message)
-    author = commit.author.email
-    short_sha = commit.hexsha[:7]
-
-    change_str = f"{message} - {author}\n"
-
-    if repo.remotes:
-        remote_url = repo.remotes[0].url
-        if remote_url.endswith(".git"):
-            remote_url = remote_url[:-4]
-
-        url = f"{remote_url}/commit/{commit.hexsha}"
-        change_str = f"[{build_md_link(short_sha, url)}] {change_str}"
-
-    if related_issues:
-        for issue in related_issues:
-            _id, url = issue
-            change_str = f"[{build_md_link(_id, url)}] {change_str}"
-
-    return "- " + change_str
-
-
-def get_issue_ids_from_commit(commit: git.Commit):
-    issue_id_pattern = r'ID-\d+'
-    issue_ids = re.findall(issue_id_pattern, commit.message)
-    return issue_ids
-
-
-def get_issues_for_ids(issues, issue_ids):
-    found = []
-    for _id in issue_ids:
-        for issue in issues:
-            issue_id, issue_url = issue
-            if issue_id == _id:
-                found.append(issue)
-
-    return found
-
-
-def get_issues_for_commit(issues, commit: git.Commit):
-    ids = get_issue_ids_from_commit(commit)
-    if (ids):
-        return get_issues_for_ids(issues, ids)
-
-
-def build_changelog_for_type(commits, issues, _filter, title):
-    _commits = commits
-    changelog = ""
-
-    if _filter is not None:
-        _commits = [x for x in _commits if x.message.startswith(_filter)]
-
-    if not _commits:
-        return changelog
-
-    changelog += f"{title}:\n"
-
-    for commit in _commits:
-        related_issues = get_issues_for_commit(issues, commit)
-        changelog += build_change_string(repo, commit, related_issues)
-
-    changelog += "\n"
-
-    return changelog
 
 
 if __name__ == "__main__":
@@ -115,40 +41,7 @@ if __name__ == "__main__":
     repo_directory = sys.argv[2]
     commit_shas = sys.argv[3:]
 
-    repo = git.Repo(repo_directory)
-    commits = [repo.commit(x) for x in commit_shas]
-    issues = notion.get_issues(notion_token)
-
-    pretty_changelog = ""
-    raw_changelog = ""
-
-    pretty_changelog += build_changelog_for_type(commits, issues, "feat", "✅ Added")
-    pretty_changelog += build_changelog_for_type(commits, issues, "fix", "🛠 Fixed")
-    pretty_changelog += build_changelog_for_type(commits, issues, "deprecate", "👴 Deprecated")
-    pretty_changelog += build_changelog_for_type(commits, issues, "chore", "🧹 Maintained")
-    pretty_changelog += build_changelog_for_type(commits, issues, "perf", "🚀 Optimized")
-    pretty_changelog += build_changelog_for_type(commits, issues, "refactor", "⚙ Refactored")
-    pretty_changelog += build_changelog_for_type(commits, issues, "style", "🖼 Styled")
-    pretty_changelog += build_changelog_for_type(commits, issues, "docs", "📝 Documented")
-    pretty_changelog += build_changelog_for_type(commits, issues, "remove", "❌ Removed")
-    others = build_changelog_for_type(commits, issues, None, "🤷‍ Other")
-    for line in others.split("\n"):
-        if line not in pretty_changelog:
-            pretty_changelog += line + "\n"
-
-    raw_changelog += build_changelog_for_type(commits, issues, "feat", "Added")
-    raw_changelog += build_changelog_for_type(commits, issues, "fix", "Fixed")
-    raw_changelog += build_changelog_for_type(commits, issues, "deprecate", "Deprecated")
-    raw_changelog += build_changelog_for_type(commits, issues, "chore", "Maintained")
-    raw_changelog += build_changelog_for_type(commits, issues, "perf", "Optimized")
-    raw_changelog += build_changelog_for_type(commits, issues, "refactor", "Refactored")
-    raw_changelog += build_changelog_for_type(commits, issues, "style", "Styled")
-    raw_changelog += build_changelog_for_type(commits, issues, "docs", "Documented")
-    raw_changelog += build_changelog_for_type(commits, issues, "remove", "Removed")
-    others = build_changelog_for_type(commits, issues, None, "Other")
-    for line in others.split("\n"):
-        if line not in raw_changelog:
-            raw_changelog += line + "\n"
+    raw_changelog, pretty_changelog = builder.build_changelog(notion_token, repo_directory, commit_shas)
 
     pyperclip.copy(pretty_changelog)
 
