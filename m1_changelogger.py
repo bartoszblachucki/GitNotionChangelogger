@@ -42,7 +42,7 @@ def strip_commit_message(message: str):
     
 def build_change_string(repo: git.Repo, commit: git.Commit, related_issues):
     message = strip_commit_message(commit.message)
-    author = commit.author.name
+    author = commit.author.email
     short_sha = commit.hexsha[:7]
     url = f"https://github.com/GameDev-Tube/FameMMA/commit/{commit.hexsha}"
     change_str = f"[{build_md_link(short_sha, url)}] {message} - {author}\n"
