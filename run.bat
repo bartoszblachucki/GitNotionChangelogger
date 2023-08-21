@@ -1,8 +1,7 @@
+rem author: Bartosz Błachucki, GameDevTube
+rem This script runs the script m1_changelogger.py script using python and passes all arguments to it
+rem Use it to quickly iterate during development or if you don't want to/can't use a built exe
 @echo off
-rem This script runs the script and passes all arguments to it
-
-rem Remember the current working directory
-set original_directory=%cd%
 
 rem Change the path to your Python executable (if needed)
 set python_executable=python
