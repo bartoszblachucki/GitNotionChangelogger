@@ -108,7 +108,7 @@ if __name__ == "__main__":
     pretty_changelog = ""
     raw_changelog = ""
 
-    pretty_changelog += build_changelog_for_type(commits, issues, "feat", "➕ Added")
+    pretty_changelog += build_changelog_for_type(commits, issues, "feat", "✅ Added")
     pretty_changelog += build_changelog_for_type(commits, issues, "fix", "🛠 Fixed")
     pretty_changelog += build_changelog_for_type(commits, issues, "deprecate", "👴 Deprecated")
     pretty_changelog += build_changelog_for_type(commits, issues, "chore", "🧹 Maintained")
