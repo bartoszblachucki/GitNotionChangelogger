@@ -34,10 +34,16 @@ A simple tool that takes a list of commit shas with conventional messages, finds
 
 ## Usage
 
-`MY_NOTION_SECRET` can be acquired from [Notion integrations page](https://www.notion.so/my-integrations) or from the Teamspace owner.
+See [releases](https://github.com/bartoszblachucki/GitNotionChangelogger/releases) for prebuilt binaries.
+Pyinstaller with `--onefile` option is used to build the executable so **python is not required to run it**.
+Place the executable anywhere in your PATH if you intend to use it from command line.
+
 ```batch
-> m1_changelogger.exe MY_NOTION_SECRET COMMITSHA1 COMMITSHA2 COMMITSHA3
+> m1_changelogger.exe MY_NOTION_SECRET d:/path/to/repo COMMITSHA1 COMMITSHA2 COMMITSHA3
 ```
+
+`MY_NOTION_SECRET` can be acquired from [Notion integrations page](https://www.notion.so/my-integrations) by the Teamspace owner. 
+Contact your Teamspace owner if you don't have access to it.
 
 Output is printed to stdout and **copied to clipboard**.
 
@@ -54,9 +60,14 @@ This tool was created to be used as a SourceTree custom action.
   <img src="./img/sourcetree_2.png" alt="SourceTree custom action usage">
 </p>
 
-## Deployment
+## How to build
 Python 3.8 with pyinstaller is required to build the executable.
+    
+    ```batch
+    > pyinstaller --onefile --icon=icon.ico m1_changelogger.py
+    ```
 
+You can also use the provided `build.bat` script.
 
 ## Used By
 This project is used by the following companies:
