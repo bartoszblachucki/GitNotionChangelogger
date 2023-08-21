@@ -141,7 +141,7 @@ def build_changelog(notion_token, repo_directory, commit_shas) -> tuple:
     raw_changelog = ""
     pretty_changelog = ""
 
-    for commit_type in commit_types:
+    for commit_type in commit_types + [other_commit_type]:
         _commits = commits_by_type[commit_type]
         if _commits:
             raw_type_changelog, pretty_type_changelog = build_type_changelog(repo, _commits, issues, commit_type)
