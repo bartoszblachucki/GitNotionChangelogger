@@ -98,9 +98,10 @@ def build_changelog_for_type(commits, issues, _filter, title):
 
 if __name__ == "__main__":
     notion_token = sys.argv[1]
-    commit_shas = sys.argv[2:]
+    repo_directory = sys.argv[2]
+    commit_shas = sys.argv[3:]
 
-    repo = git.Repo(".")
+    repo = git.Repo(repo_directory)
     commits = [repo.commit(x) for x in commit_shas]
     issues = notion.get_issues(notion_token)
     
