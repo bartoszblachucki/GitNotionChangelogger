@@ -34,12 +34,15 @@ import pyperclip
 # local
 import notion
 
+
 def build_md_link(text: str, url: str):
     return f"[{text}]({url})"
 
+
 def strip_commit_message(message: str):
     return message.split('\n', 1)[0]
-    
+
+
 def build_change_string(repo: git.Repo, commit: git.Commit, related_issues):
     message = strip_commit_message(commit.message)
     author = commit.author.email
@@ -62,10 +65,12 @@ def build_change_string(repo: git.Repo, commit: git.Commit, related_issues):
 
     return "- " + change_str
 
+
 def get_issue_ids_from_commit(commit: git.Commit):
     issue_id_pattern = r'ID-\d+'
     issue_ids = re.findall(issue_id_pattern, commit.message)
     return issue_ids
+
 
 def get_issues_for_ids(issues, issue_ids):
     found = []
@@ -76,15 +81,15 @@ def get_issues_for_ids(issues, issue_ids):
                 found.append(issue)
 
     return found
-    
+
 
 def get_issues_for_commit(issues, commit: git.Commit):
     ids = get_issue_ids_from_commit(commit)
     if (ids):
         return get_issues_for_ids(issues, ids)
 
-def build_changelog_for_type(commits, issues, _filter, title):
 
+def build_changelog_for_type(commits, issues, _filter, title):
     _commits = commits
     changelog = ""
 
@@ -95,7 +100,7 @@ def build_changelog_for_type(commits, issues, _filter, title):
         return changelog
 
     changelog += f"{title}:\n"
-    
+
     for commit in _commits:
         related_issues = get_issues_for_commit(issues, commit)
         changelog += build_change_string(repo, commit, related_issues)
@@ -103,6 +108,7 @@ def build_changelog_for_type(commits, issues, _filter, title):
     changelog += "\n"
 
     return changelog
+
 
 if __name__ == "__main__":
     notion_token = sys.argv[1]
@@ -112,7 +118,7 @@ if __name__ == "__main__":
     repo = git.Repo(repo_directory)
     commits = [repo.commit(x) for x in commit_shas]
     issues = notion.get_issues(notion_token)
-    
+
     pretty_changelog = ""
     raw_changelog = ""
 
@@ -143,7 +149,7 @@ if __name__ == "__main__":
     for line in others.split("\n"):
         if line not in raw_changelog:
             raw_changelog += line + "\n"
-            
+
     pyperclip.copy(pretty_changelog)
 
     print()

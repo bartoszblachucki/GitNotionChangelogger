@@ -2,8 +2,8 @@ import requests
 
 DATABASE_ID = "292dd4e8e0b3432d9c5014294a5f7a7d"
 
-def get_pages(token):
 
+def get_pages(token):
     headers = {
         "Authorization": "Bearer " + token,
         "Content-Type": "application/json",
@@ -34,6 +34,7 @@ def get_pages(token):
 
     return results
 
+
 def get_issues(token):
     pages = get_pages(token)
     issues = []
@@ -46,4 +47,3 @@ def get_issues(token):
         issues.append((issue_id_str, issue_url))
 
     return issues
-    
