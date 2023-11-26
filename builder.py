@@ -26,6 +26,18 @@ def is_breaking_change(commit):
     return is_exclamation
 
 
+def build_commit_url(repo: git.Repo, commit: git.Commit):
+    if not repo.remotes:
+        return None
+
+    remote_url = repo.remotes[0].url
+    if remote_url.endswith(".git"):
+        remote_url = remote_url[:-4]
+
+    url = f"{remote_url}/commit/{commit.hexsha}"
+    return url
+
+
 def build_change_string(repo: git.Repo, commit: git.Commit, related_issues):
     message = strip_commit_message(commit.message)
     author = commit.author.email
@@ -149,3 +161,10 @@ def build_changelog(notion_token, repo_directory, commit_shas) -> tuple:
             pretty_changelog += pretty_type_changelog
 
     return raw_changelog, pretty_changelog
+
+
+def get_commit_url(repo_directory, commit_sha):
+    repo = git.Repo(repo_directory)
+    commit = repo.commit(commit_sha)
+    url = build_commit_url(repo, commit)
+    return url
